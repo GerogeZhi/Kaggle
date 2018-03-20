@@ -1,4 +1,5 @@
-## Kaggle
+## Some Machine learning model for Titanic
+
 LinearRegression 
 
 LogisticRegression 
