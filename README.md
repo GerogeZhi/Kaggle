@@ -1,2 +1,17 @@
-# Kaggle
-some kaggle cases
+## Kaggle
+LinearRegression 
+
+LogisticRegression 
+
+RandomForestClassifier 
+
+Feature Selection 
+
+Model Selectioin 
+
+Ensemble Generation 
+
+GradientBoosingClassifier and LogisticRegression 
+
+Finetuning 
+
