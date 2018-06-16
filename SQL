@@ -1,0 +1,182 @@
+
+# using string patterns, Rangers
+
+select firstname from author
+where firstname like 'R%'
+
+select title,page from book
+where page>=290 AND page <=300
+
+select title,page from book
+where page between 290 and 300
+
+select firstname,lastname,country
+from author where country='AU' or country = 'BR'
+
+select firstname,lastname,country
+from author where country IN('AU','BR')
+
+# sorting
+select title from book
+order by title
+
+select title from book
+order by title desc
+
+select title,pages from book
+order by 2 (# ascending order by column 2)
+
+# grouping
+
+select country from author
+order by 1
+
+select country from author order by 1
+
+select distinct(country) from author
+
+select country,count(country) from author
+group by country
+
+select country,count(country)
+as count from author group by country
+
+select country,count(country) as count
+from author group by country
+
+select country,count(country) as count
+from author group by country
+having count(country)>4
+
+# inner join
+
+SELECT B.BORROWER_ID, B.LASTNAME, B.COUNTRY, L.BORROWER_ID, L.LOAD_DATE FROM BORROWER.B
+INTER JOIN LOAN.L ON B.BORROWER_ID = L.BORROWER_ID
+
+SELECT B.LASTNAME, L.COPY_ID, C.STATUS
+FROM BORROWER.B
+	INNER JOIN LOAN.L ON B.BORROWER_ID = L.BORROWER_ID
+	INNER JOIN COPY.C ON L.COPY_ID = C.COPY_ID
+	
+# left outer join
+
+SELECT B.BORROWER_ID, B.LASTNAME, B.COUNTRY, L.BORROWER_ID, L.LOAD_DATE
+FROM BORROWER.B LEFT JOIN LOAN.L
+	ON B.BORROWER_ID = L.BORROWER_ID
+	
+# right outer join
+
+SELECT B.BORROWER_ID, B.LASTNAME, B.COUNTRY, L.BORROWER_ID, L.LOAN_DATE
+FROM BORROWER.B RIGHT JOIN LOAN.L
+	ON B.BORROWER_ID = L.BORROWER_ID
+
+# full outer join
+
+SELECT B.BORROWER_ID, B.LASTNAME, B.COUNTRY, L.BORROWER_ID, L.LOAN_DATA
+FROM BORROWER.B FULL JOIN LOAD.L 
+	ON B.BORROWER_ID = L.BORROWER_ID
+
+# ----- using DB-API
+
+from dbmodule import connect
+
+#create connection object
+Connection = conect('databasename','username','pswd')
+
+#create a cursor object
+Cursor = connection.cursor()
+
+# run queries
+Cursor.execute('select * from mytable')
+Results = cursor.fetchall()
+
+# Free resources
+Cursor.close()
+Connection.close()
+
+# ------- using ibm_db API
+
+import imb_db
+#create database connection
+dsn = (
+	'DRIVER={{IBM DB2 ODBC DRIVER}};'
+	'DATABASE = (0);'
+	'HOSTNAME=(1);'
+	'PORT=(2);'
+	'PROTOCOL=TCPIP;'
+	'UID=(3);'
+	'PWD=(4);').format(dsn_database,dsn.hostname,dsn_port,dsn_uid,dsn_pwd)
+
+try:
+	conn = ibm_db.connect(dsn,"","")
+	print('connected')
+except:
+	print('unabel to connect to database')
+
+	
+	
+ibm_db.close(conn)
+
+# --------- creating tables,loading data and querying data
+
+# create table
+stmt = ibm_db.exec_immediate(conn,
+'CREATE TABLE Trucks(
+serial_no varchar(20) PRIMARY KEY NOT NULL,
+model VARCHAR(20) NOT NULL,
+manufacturer VARCHAR(20)NOT NULL,
+Engine_size VARCHAR(20) NOT NULL,
+Truck_Class VARCHAR(20) NOT NULL)'
+)
+
+# loading data
+stmt = ibm_db.exec_immediate(conn,
+'INSERT INTO Trucks(serial_no,model,manufacturer,Engine_size,Truck_Class)
+VALUES('A1234','lonestar','International Trucks','Cumm','Class 8');')
+
+stmt = ibm_db.exec_immediate(conn,
+'INSERT INTO Trucks(serial_no,model,manufacturer,Engine_size,Truck_Class)
+VALUES('B2345','porsche','International Trucks','Cumm','Class 8');')
+
+# query data
+stmt = ibm_db.exec_immediate(conn,'SELECT * FROM Trucks')
+ibm_db.fetch_both(stmt)
+
+# using pandas
+
+import pandas
+import imb_db_dbi
+pconn = imb_db_dbi.Connection(conn)
+df = pandas.read_sql('SELECT * FROM Trucks',pconn)
+df
+
+
+# analyzing data with python
+stmt = ibm_db.exec_immediate(conn,'SELECT count(*) FROM MCDONALDDS_NUTRITION')
+ibm_db.fetch_both(stmt)
+import pandas 
+import imb_db_dbi
+pconn = ibm_db_dbi.Connection(conn)
+df=pandas.read_sql('SELECT * FROM MCDONALDS_NUTRITION',pconn)
+df.head()
+df.describe(include='all')
+
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+
+plot = sns.swarmplot(x='Category',y='Sodium',data=df)
+plot.setp(plot.get_xticklabels(),rotation=70)
+plt.title('Sodium Content')
+plt.show()
+
+df['Sodium'].describe()
+df['Sodium'].idxmax()
+df.at[82,'Item']
+
+plot = sns.jointplot(x='Protein',y='Total Fat',data=df)
+plt.show()
+
+plt = sns.set_style('whitegrid')
+ax=sns.boxplot(x=df['Sugars'])
+plt.show()
